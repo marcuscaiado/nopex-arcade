@@ -189,31 +189,48 @@ export class Arcade3DEngine {
     // 3. Camera Follow & Smooth Zoom
     if (this.isZoomingIn && this.zoomTarget) {
       const cab = this.zoomTarget;
-      const screenWorldPos = new THREE.Vector3(0, 2.15, 0.51)
-        .applyEuler(new THREE.Euler(0, cab.rotationY, 0))
-        .add(new THREE.Vector3(cab.position.x, 0, cab.position.z));
+      const rotY = cab.rotationY;
 
+      // Exact Screen Center in world space
+      const screenCenterX = cab.position.x + Math.sin(rotY) * 0.51;
+      const screenCenterY = 2.15;
+      const screenCenterZ = cab.position.z + Math.cos(rotY) * 0.51;
+      const screenCenter = new THREE.Vector3(screenCenterX, screenCenterY, screenCenterZ);
+
+      // Normal vector directly perpendicular to the angled CRT face
+      const normalX = Math.sin(rotY) * 0.975;
+      const normalY = 0.22;
+      const normalZ = Math.cos(rotY) * 0.975;
+
+      // Camera position placed directly along the screen normal at distance 1.35m
       const targetCamPos = new THREE.Vector3(
-        cab.standSpot.x * 0.35 + screenWorldPos.x * 0.65,
-        2.2,
-        cab.standSpot.z * 0.35 + screenWorldPos.z * 0.65
+        screenCenterX + normalX * 1.35,
+        screenCenterY + normalY * 1.35,
+        screenCenterZ + normalZ * 1.35
       );
 
-      this.camera.position.lerp(targetCamPos, 0.14);
-      this.camera.lookAt(screenWorldPos);
+      this.camera.position.lerp(targetCamPos, 0.16);
+      this.camera.lookAt(screenCenter);
     } else {
-      // Third-person smooth follow (Fixed height steadycam: 100% fluid, zero vertical shake)
+      // Third-person smooth follow (Fixed height steadycam: 100% fluid, zero tilt)
       const targetCamX = this.player.x;
       const targetCamY = 4.0;
-      const targetCamZ = this.player.z + 6.2;
+      // Clamp camera so it NEVER penetrates the south wall
+      const targetCamZ = Math.min(26.0, this.player.z + 6.2);
 
-      this.camera.position.x += (targetCamX - this.camera.position.x) * 0.15;
-      this.camera.position.y += (targetCamY - this.camera.position.y) * 0.15;
-      this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.15;
+      this.camera.position.x += (targetCamX - this.camera.position.x) * 0.14;
+      this.camera.position.y += (targetCamY - this.camera.position.y) * 0.14;
+      this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.14;
 
-      // Look slightly forward into the arcade hall at steady eye-level
-      const lookTarget = new THREE.Vector3(this.player.x, 1.4, this.player.z - 1.2);
-      this.camera.lookAt(lookTarget);
+      // Smooth lookTarget with synchronized lerp to prevent any camera tilt or sway
+      if (!this.camLookTarget) {
+        this.camLookTarget = new THREE.Vector3(this.player.x, 1.4, this.player.z - 1.2);
+      }
+      this.camLookTarget.x += (this.player.x - this.camLookTarget.x) * 0.14;
+      this.camLookTarget.y = 1.4;
+      this.camLookTarget.z += ((this.player.z - 1.2) - this.camLookTarget.z) * 0.14;
+
+      this.camera.lookAt(this.camLookTarget);
     }
 
     this.renderer.render(this.scene, this.camera);

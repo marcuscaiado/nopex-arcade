@@ -85,7 +85,7 @@ export function buildArcadeWorld(scene, gamesManifest) {
     minX: -23.5,
     maxX: 23.5,
     minZ: -29.0,
-    maxZ: 25.0
+    maxZ: 18.0 // Clamp player from walking past active arcade area
   };
 
   const worldGroup = new THREE.Group();
@@ -119,9 +119,9 @@ export function buildArcadeWorld(scene, gamesManifest) {
   goldLight.position.set(15, 7, -10);
   worldGroup.add(goldLight);
 
-  // 2. Room Floor
+  // 2. Room Floor (Extended south to provide plenty of camera clearance)
   const carpetTex = createCarpetTexture();
-  const floorGeo = new THREE.PlaneGeometry(50, 60);
+  const floorGeo = new THREE.PlaneGeometry(50, 76);
   const floorMat = new THREE.MeshStandardMaterial({
     map: carpetTex,
     roughness: 0.5,
@@ -129,7 +129,7 @@ export function buildArcadeWorld(scene, gamesManifest) {
   });
   const floorMesh = new THREE.Mesh(floorGeo, floorMat);
   floorMesh.rotation.x = -Math.PI / 2;
-  floorMesh.position.set(0, 0, -2);
+  floorMesh.position.set(0, 0, 4);
   worldGroup.add(floorMesh);
 
   // Center Rotunda Floor Disc (Spacious 10m center plaza)
@@ -158,11 +158,12 @@ export function buildArcadeWorld(scene, gamesManifest) {
   emblem.position.set(0, 0.1, -2.5);
   worldGroup.add(emblem);
 
-  // 3. Walls
+  // 3. Walls (FrontSide only, so camera can never be blinded from outside)
   const wallMat = new THREE.MeshStandardMaterial({
     color: 0x161a2e,
     roughness: 0.5,
-    metalness: 0.3
+    metalness: 0.3,
+    side: THREE.FrontSide
   });
 
   // North Back Wall
@@ -170,19 +171,19 @@ export function buildArcadeWorld(scene, gamesManifest) {
   northWall.position.set(0, 5, -30);
   worldGroup.add(northWall);
 
-  // South Entrance Wall
+  // South Entrance Wall (Placed far at Z=40 to give infinite camera space)
   const southWall = new THREE.Mesh(new THREE.BoxGeometry(50, 10, 1), wallMat);
-  southWall.position.set(0, 5, 26);
+  southWall.position.set(0, 5, 40);
   worldGroup.add(southWall);
 
   // West Wall
-  const westWall = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 60), wallMat);
-  westWall.position.set(-24.5, 5, -2);
+  const westWall = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 72), wallMat);
+  westWall.position.set(-24.5, 5, 4);
   worldGroup.add(westWall);
 
   // East Wall
-  const eastWall = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 60), wallMat);
-  eastWall.position.set(24.5, 5, -2);
+  const eastWall = new THREE.Mesh(new THREE.BoxGeometry(1, 10, 72), wallMat);
+  eastWall.position.set(24.5, 5, 4);
   worldGroup.add(eastWall);
 
   // Horizontal Wall Neon Tubes
@@ -196,8 +197,8 @@ export function buildArcadeWorld(scene, gamesManifest) {
 
   createNeonStrip(0, 4.2, -29.4, 48, false, 0x00f5ff);
   createNeonStrip(0, 7.8, -29.4, 48, false, 0xff007f);
-  createNeonStrip(-23.9, 4.2, -2, 56, true, 0x05ffa1);
-  createNeonStrip(23.9, 4.2, -2, 56, true, 0xffd32a);
+  createNeonStrip(-23.9, 4.2, 4, 68, true, 0x05ffa1);
+  createNeonStrip(23.9, 4.2, 4, 68, true, 0xffd32a);
 
   // 4. Large Neon Signage
   const mainSign = createNeonBanner('⚡ NOPEX VIRTUAL ARCADE ⚡', 24, 6, '#00f5ff', '#ff007f');

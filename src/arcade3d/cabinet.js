@@ -60,70 +60,109 @@ function createMarqueeTexture(game, theme) {
 }
 
 /**
- * Creates animated CRT Screen Canvas Texture
+ * Creates animated CRT Screen Canvas Texture (512x512 with centered title, logo & coin prompt)
  */
 function createScreenTexture(game, theme) {
   const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
   const update = (time) => {
-    // Dark CRT background
+    // 1. Dark CRT Cyber Background
     ctx.fillStyle = '#060a1e';
-    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillRect(0, 0, 512, 512);
 
-    // Glowing grid lines
-    ctx.strokeStyle = 'rgba(0, 245, 255, 0.25)';
-    ctx.lineWidth = 1;
-    const gridOffset = (time * 25) % 24;
-    for (let y = gridOffset; y < 256; y += 24) {
+    // 2. Cyan Grid Matrix
+    ctx.strokeStyle = 'rgba(0, 245, 255, 0.2)';
+    ctx.lineWidth = 2;
+    const gridOffset = (time * 30) % 32;
+    for (let y = gridOffset; y < 512; y += 32) {
       ctx.beginPath();
       ctx.moveTo(0, y);
-      ctx.lineTo(256, y);
+      ctx.lineTo(512, y);
+      ctx.stroke();
+    }
+    for (let x = 0; x < 512; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, 512);
       ctx.stroke();
     }
 
-    // Central pulsing game icon
-    const scale = 1.0 + Math.sin(time * 3.0) * 0.1;
+    // 3. Header Badge
+    ctx.fillStyle = 'rgba(255, 0, 127, 0.4)';
+    ctx.fillRect(100, 35, 312, 36);
+    ctx.strokeStyle = '#ff007f';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(100, 35, 312, 36);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px "Press Start 2P", monospace, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('★ ARCADE CLASSIC ★', 256, 53);
+
+    // 4. Central Pulsing Game Icon (Centered at Y = 160)
+    const scale = 1.0 + Math.sin(time * 3.5) * 0.08;
     ctx.save();
-    ctx.translate(128, 105);
+    ctx.translate(256, 160);
     ctx.scale(scale, scale);
-    ctx.font = '64px sans-serif';
+    ctx.font = '76px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.shadowColor = '#' + theme.primary.toString(16).padStart(6, '0');
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 24;
     ctx.fillText(game.icon || '🎮', 0, 0);
     ctx.restore();
 
-    // CRT Scanlines
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    for (let y = 0; y < 256; y += 4) {
-      ctx.fillRect(0, y, 256, 2);
-    }
+    // 5. Game Title (Centered at Y = 260)
+    ctx.font = 'bold 28px "Outfit", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#' + theme.primary.toString(16).padStart(6, '0');
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText((game.name || 'ARCADE GAME').toUpperCase(), 256, 260);
 
-    // "INSERT COIN" / "PRESS SPACE" flashing text
+    // 6. Category Tag (Centered at Y = 310)
+    ctx.font = 'bold 16px monospace';
+    ctx.fillStyle = '#ffd32a';
+    ctx.shadowColor = '#ffd32a';
+    ctx.shadowBlur = 10;
+    ctx.fillText(`• ${(game.category || 'ACTION').toUpperCase()} • 60 FPS •`, 256, 310);
+
+    // 7. Flashing "INSERT COIN [SPACE]" Prompt (Centered at Y = 410)
     if (Math.floor(time * 2.5) % 2 === 0) {
       ctx.fillStyle = '#' + theme.primary.toString(16).padStart(6, '0');
-      ctx.font = 'bold 16px monospace';
-      ctx.textAlign = 'center';
+      ctx.font = 'bold 22px monospace';
       ctx.shadowColor = '#' + theme.accent.toString(16).padStart(6, '0');
-      ctx.shadowBlur = 10;
-      ctx.fillText('INSERT COIN [SPACE]', 128, 205);
+      ctx.shadowBlur = 16;
+      ctx.fillText('▶ PRESS [SPACE] TO PLAY ◀', 256, 410);
+
+      ctx.font = '14px monospace';
+      ctx.fillStyle = '#94a3b8';
+      ctx.shadowBlur = 0;
+      ctx.fillText('INSERT 1 COIN (25¢)', 256, 442);
     }
 
-    // Border CRT glow
+    // 8. CRT Scanlines
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+    for (let y = 0; y < 512; y += 4) {
+      ctx.fillRect(0, y, 512, 2);
+    }
+
+    // 9. CRT Glass Bezel Border
     ctx.strokeStyle = '#' + theme.primary.toString(16).padStart(6, '0');
-    ctx.lineWidth = 4;
-    ctx.strokeRect(4, 4, 248, 248);
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, 504, 504);
 
     texture.needsUpdate = true;
   };
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.minFilter = THREE.LinearFilter;
-  update(0); // Initial frame render
+  update(0);
   return { texture, update };
 }
 

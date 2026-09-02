@@ -294,7 +294,7 @@ export class ArcadePlayer {
     if (this.isMoving) {
       this.leftFoot.position.z = Math.sin(this.walkCycle) * 0.22;
       this.rightFoot.position.z = -Math.sin(this.walkCycle) * 0.22;
-      this.torso.rotation.z = Math.sin(this.walkCycle) * 0.06;
+      this.torso.rotation.z = 0; // Zero roll tilt: keeps character and camera perfectly level
     } else {
       this.leftFoot.position.z = 0;
       this.rightFoot.position.z = 0;
