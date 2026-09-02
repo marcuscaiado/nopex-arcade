@@ -287,12 +287,16 @@ export function createArcadeCabinet(game, position, rotationY = 0) {
   const standX = position.x + forwardX;
   const standZ = position.z + forwardZ;
 
-  // Collision box (AABB in world space)
+  // Exact collision box (AABB in world space accounting for orientation)
+  const isSideways = Math.abs(Math.sin(rotationY)) > 0.5;
+  const halfX = isSideways ? 0.65 : 0.78;
+  const halfZ = isSideways ? 0.78 : 0.65;
+
   const collisionBox = {
-    minX: position.x - 1.1,
-    maxX: position.x + 1.1,
-    minZ: position.z - 1.1,
-    maxZ: position.z + 1.1
+    minX: position.x - halfX,
+    maxX: position.x + halfX,
+    minZ: position.z - halfZ,
+    maxZ: position.z + halfZ
   };
 
   return {

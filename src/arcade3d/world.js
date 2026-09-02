@@ -132,23 +132,31 @@ export function buildArcadeWorld(scene, gamesManifest) {
   floorMesh.position.set(0, 0, -2);
   worldGroup.add(floorMesh);
 
-  // Center Rotunda Floor Disc
-  const rotundaFloorGeo = new THREE.CylinderGeometry(8.5, 8.5, 0.08, 32);
+  // Center Rotunda Floor Disc (Spacious 10m center plaza)
+  const rotundaFloorGeo = new THREE.CylinderGeometry(10.5, 10.5, 0.08, 36);
   const rotundaFloorMat = new THREE.MeshStandardMaterial({
     color: 0x182042,
     roughness: 0.3,
     metalness: 0.5
   });
   const rotundaDisc = new THREE.Mesh(rotundaFloorGeo, rotundaFloorMat);
-  rotundaDisc.position.set(0, 0.04, -2);
+  rotundaDisc.position.set(0, 0.04, -2.5);
   worldGroup.add(rotundaDisc);
 
-  const rotundaRingGeo = new THREE.RingGeometry(8.2, 8.5, 36);
+  const rotundaRingGeo = new THREE.RingGeometry(10.2, 10.5, 36);
   const rotundaRingMat = new THREE.MeshBasicMaterial({ color: 0x00f5ff, side: THREE.DoubleSide });
   const rotundaRing = new THREE.Mesh(rotundaRingGeo, rotundaRingMat);
   rotundaRing.rotation.x = -Math.PI / 2;
-  rotundaRing.position.set(0, 0.09, -2);
+  rotundaRing.position.set(0, 0.09, -2.5);
   worldGroup.add(rotundaRing);
+
+  // Decorative Center Hologram Emblem at (0, -2.5)
+  const emblemGeo = new THREE.RingGeometry(1.2, 1.8, 24);
+  const emblemMat = new THREE.MeshBasicMaterial({ color: 0xff007f, side: THREE.DoubleSide });
+  const emblem = new THREE.Mesh(emblemGeo, emblemMat);
+  emblem.rotation.x = -Math.PI / 2;
+  emblem.position.set(0, 0.1, -2.5);
+  worldGroup.add(emblem);
 
   // 3. Walls
   const wallMat = new THREE.MeshStandardMaterial({
@@ -227,11 +235,11 @@ export function buildArcadeWorld(scene, gamesManifest) {
     cabinets.push(cab);
   };
 
-  // ZONE 1: CENTER ROTUNDA (4 Featured MegaHits)
-  addCabinet('cyber-pong-3d',     { x: 0, z: 1.8 }, Math.PI);          // Faces North (directly towards player spawn)
-  addCabinet('geometricsurvivor', { x: 0, z: -5.8 }, 0);          // Faces South
-  addCabinet('neon-viper',        { x: -3.8, z: -2.0 }, Math.PI / 2);  // Faces East
-  addCabinet('cute-mini-golf',    { x: 3.8, z: -2.0 }, -Math.PI / 2); // Faces West
+  // ZONE 1: CENTER ROTUNDA (4 Featured MegaHits with Wide Open Walkways)
+  addCabinet('cyber-pong-3d',     { x: 0, z: 2.8 }, Math.PI);          // Faces South towards player spawn
+  addCabinet('geometricsurvivor', { x: 0, z: -7.5 }, 0);          // Faces North
+  addCabinet('neon-viper',        { x: -6.0, z: -2.5 }, Math.PI / 2);  // Faces East
+  addCabinet('cute-mini-golf',    { x: 6.0, z: -2.5 }, -Math.PI / 2); // Faces West
 
   // ZONE 2: ACTION ALLEY (West Side, X = -18, Facing East)
   addCabinet('neon-katana-slash',   { x: -18, z: -17 }, Math.PI / 2);

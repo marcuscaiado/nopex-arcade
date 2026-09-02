@@ -202,17 +202,17 @@ export class Arcade3DEngine {
       this.camera.position.lerp(targetCamPos, 0.14);
       this.camera.lookAt(screenWorldPos);
     } else {
-      // Third-person smooth follow
+      // Third-person smooth follow (Fixed height steadycam: 100% fluid, zero vertical shake)
       const targetCamX = this.player.x;
-      const targetCamY = this.player.y + 4.2;
+      const targetCamY = 4.0;
       const targetCamZ = this.player.z + 6.2;
 
-      this.camera.position.x += (targetCamX - this.camera.position.x) * 0.12;
-      this.camera.position.y += (targetCamY - this.camera.position.y) * 0.12;
-      this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.12;
+      this.camera.position.x += (targetCamX - this.camera.position.x) * 0.15;
+      this.camera.position.y += (targetCamY - this.camera.position.y) * 0.15;
+      this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.15;
 
-      // Look slightly forward into the arcade hall
-      const lookTarget = new THREE.Vector3(this.player.x, this.player.y + 1.4, this.player.z - 1.2);
+      // Look slightly forward into the arcade hall at steady eye-level
+      const lookTarget = new THREE.Vector3(this.player.x, 1.4, this.player.z - 1.2);
       this.camera.lookAt(lookTarget);
     }
 

@@ -11,7 +11,7 @@ export class ArcadePlayer {
     this.rotation = Math.PI; // Face North (-Z) towards cabinets
     this.targetRotation = Math.PI;
     this.speed = 7.5; // Walk speed
-    this.radius = 0.8; // Player collision radius
+    this.radius = 0.45; // Human-scale collision radius
 
     this.isMoving = false;
     this.walkCycle = 0;
@@ -244,25 +244,32 @@ export class ArcadePlayer {
       nextX = Math.max(roomBounds.minX + this.radius, Math.min(roomBounds.maxX - this.radius, nextX));
       nextZ = Math.max(roomBounds.minZ + this.radius, Math.min(roomBounds.maxZ - this.radius, nextZ));
 
-      // 2. Circle-to-AABB Cabinet Collision Check (separate X and Z for sliding)
+      // 2. Continuous Circle-to-AABB Cabinet Collision with Smooth Gliding
       for (const cab of cabinets) {
         const box = cab.collisionBox;
-        // Test X motion
-        if (nextX + this.radius > box.minX && nextX - this.radius < box.maxX &&
-            this.z + this.radius > box.minZ && this.z - this.radius < box.maxZ) {
-          nextX = this.x; // Block X movement
-        }
-        // Test Z motion
-        if (nextX + this.radius > box.minX && nextX - this.radius < box.maxX &&
-            nextZ + this.radius > box.minZ && nextZ - this.radius < box.maxZ) {
-          nextZ = this.z; // Block Z movement
+        const closestX = Math.max(box.minX, Math.min(nextX, box.maxX));
+        const closestZ = Math.max(box.minZ, Math.min(nextZ, box.maxZ));
+
+        let diffX = nextX - closestX;
+        let diffZ = nextZ - closestZ;
+        const distSq = diffX * diffX + diffZ * diffZ;
+
+        if (distSq < this.radius * this.radius) {
+          const dist = Math.sqrt(distSq);
+          if (dist > 0.0001) {
+            const overlap = this.radius - dist;
+            nextX += (diffX / dist) * overlap;
+            nextZ += (diffZ / dist) * overlap;
+          } else {
+            nextZ += this.radius;
+          }
         }
       }
 
       this.x = nextX;
       this.z = nextZ;
 
-      // Footstep sound & Walking animation
+      // Footstep sound
       this.walkCycle += delta * 14.0;
       this.footstepTimer += delta;
       if (this.footstepTimer > 0.28) {
@@ -280,9 +287,8 @@ export class ArcadePlayer {
     while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
     this.rotation += rotDiff * 0.25;
 
-    // Visual walking bounce & feet stride
-    const bounce = Math.abs(Math.sin(this.walkCycle)) * 0.12;
-    this.group.position.set(this.x, this.y + bounce, this.z);
+    // Rock-solid grounded root position: ZERO vertical shake or wobble on camera
+    this.group.position.set(this.x, this.y, this.z);
     this.group.rotation.y = this.rotation;
 
     if (this.isMoving) {
