@@ -32,6 +32,7 @@ function initNopexArcade() {
     teleportSelect.addEventListener('change', (e) => {
       const gameId = e.target.value;
       if (gameId && engine) {
+        import('./arcade3d/audio.js').then(m => m.playDopamineChime());
         engine.teleportToCabinet(gameId);
         teleportSelect.blur();
       }
