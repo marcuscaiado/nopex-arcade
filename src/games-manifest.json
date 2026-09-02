@@ -218,5 +218,16 @@
     "description": "Rhythmic knife throwing into rotating boss matrices with harmonic chimes.",
     "tech": ["Canvas 2D", "Rotational Math", "Boss Waves"],
     "badgeClass": "btn-shuriken"
+  },
+  {
+    "id": "flappy-cyber-droid",
+    "name": "Flappy Cyber Droid",
+    "icon": "🐦",
+    "category": "arcade",
+    "unit": "GATES",
+    "url": "https://marcuscaiado.github.io/flappy-cyber-droid/",
+    "description": "Addictive neon flapper arcade game featuring a hovering cyber-droid, laser gates & energy crystals.",
+    "tech": ["Canvas 2D", "One-Tap Flap", "Laser Gates"],
+    "badgeClass": "btn-droid"
   }
 ]
