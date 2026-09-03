@@ -343,8 +343,9 @@
           left: 0;
           width: 100vw;
           height: 100vh;
-          pointer-events: none;
+          pointer-events: none !important;
           z-index: 99998;
+          background: transparent !important;
         }
         @keyframes dopamineScorePop {
           0% { transform: translate(-50%, 0) scale(1.45); opacity: 0; }
@@ -361,6 +362,8 @@
       if (!confettiCanvas) {
         confettiCanvas = document.createElement('canvas');
         confettiCanvas.id = 'dopamine-confetti-canvas';
+        confettiCanvas.style.background = 'transparent';
+        confettiCanvas.style.pointerEvents = 'none';
         document.body.appendChild(confettiCanvas);
       }
       confettiCtx = confettiCanvas.getContext('2d');
