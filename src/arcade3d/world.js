@@ -271,6 +271,7 @@ export function buildArcadeWorld(scene, gamesManifest) {
     roomBounds,
     cabinets,
     worldGroup,
+    floorMesh,
     update(time) {
       cabinets.forEach(cab => cab.update(time));
       rotundaRing.material.opacity = 0.8 + Math.sin(time * 4) * 0.2;

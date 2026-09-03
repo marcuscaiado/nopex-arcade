@@ -2,9 +2,9 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>⚡ NOPEX ARCADE 3D ⚡ | Fliperama Virtual Walkable</title>
-    <meta name="description" content="Explore o Nopex Arcade em 3D! Ande com seu personagem pelo fliperama synthwave, escolha entre 20 máquinas de arcade e jogue instantaneamente." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>⚡ NOPEX ARCADE 3D ⚡ | Fliperama Virtual Walkable (21 Jogos)</title>
+    <meta name="description" content="Explore o Nopex Arcade em 3D! Ande com seu personagem pelo fliperama synthwave, escolha entre 21 máquinas de arcade e jogue instantaneamente no PC ou celular." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -88,10 +88,37 @@
         </div>
       </div>
 
-      <!-- Mobile Virtual Joystick & Play Button -->
+      <!-- Mobile Virtual Joystick with Direction Arrows -->
       <div id="arcade-joystick" class="arcade-mobile-joystick">
+        <div class="joystick-arrow arrow-up">▲</div>
+        <div class="joystick-arrow arrow-down">▼</div>
+        <div class="joystick-arrow arrow-left">◀</div>
+        <div class="joystick-arrow arrow-right">▶</div>
         <div id="joystick-thumb" class="joystick-thumb"></div>
       </div>
+
+      <!-- Mobile On-Screen D-Pad (Alternative discrete directional control) -->
+      <div id="arcade-dpad" class="arcade-mobile-dpad">
+        <button id="dpad-up" class="dpad-btn dpad-up" aria-label="Mover para Cima">▲</button>
+        <div class="dpad-middle-row">
+          <button id="dpad-left" class="dpad-btn dpad-left" aria-label="Mover para Esquerda">◀</button>
+          <div class="dpad-center-hub">🕹️</div>
+          <button id="dpad-right" class="dpad-btn dpad-right" aria-label="Mover para Direita">▶</button>
+        </div>
+        <button id="dpad-down" class="dpad-btn dpad-down" aria-label="Mover para Baixo">▼</button>
+      </div>
+
+      <!-- Mobile Touch Controls Toggle (Switch between Joystick and D-Pad) -->
+      <button id="arcade-ctrl-toggle" class="control-mode-toggle" title="Alternar Modo de Controle">
+        <span>🎮 D-PAD</span>
+      </button>
+
+      <!-- Mobile Tap-to-Walk Floating Hint -->
+      <div class="mobile-controls-hint">
+        ⚡ Toque no chão ou na máquina para andar • Arraste o joystick
+      </div>
+
+      <!-- Mobile Action Play Button -->
       <button id="arcade-action-btn" class="arcade-mobile-action-btn">
         <span>JOGAR</span> 🕹️
       </button>

@@ -20,8 +20,12 @@ export class Arcade3DEngine {
     this.initInteraction();
     this.initOverlay();
     this.initMobileControls();
+    this.initTapToWalk();
 
     window.addEventListener('resize', () => this.onResize());
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.onResize(), 150);
+    });
   }
 
   initScene() {
@@ -44,6 +48,21 @@ export class Arcade3DEngine {
 
     this.container.appendChild(this.renderer.domElement);
     this.clock = new THREE.Clock();
+
+    // Tap-to-walk Raycaster and Destination Ring Pulse
+    this.raycaster = new THREE.Raycaster();
+    const ringGeo = new THREE.RingGeometry(0.5, 0.75, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x00f5ff,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0
+    });
+    this.destinationRing = new THREE.Mesh(ringGeo, ringMat);
+    this.destinationRing.rotation.x = -Math.PI / 2;
+    this.destinationRing.position.set(0, 0.05, 0);
+    this.scene.add(this.destinationRing);
+    this.destinationPulse = 0;
   }
 
   initWorld() {
@@ -82,13 +101,101 @@ export class Arcade3DEngine {
   teleportToCabinet(gameId) {
     const cab = this.world.cabinets.find(c => c.game.id === gameId);
     if (!cab) return;
+    this.player.clearNavigationTarget();
     this.player.x = cab.standSpot.x;
     this.player.z = cab.standSpot.z;
     this.player.rotation = cab.rotationY + Math.PI;
     this.player.targetRotation = this.player.rotation;
+    this.interaction.update(this.player);
+  }
+
+  showDestinationPulse(x, z) {
+    this.destinationRing.position.set(x, 0.04, z);
+    this.destinationRing.scale.set(0.6, 0.6, 0.6);
+    this.destinationRing.material.opacity = 0.9;
+    this.destinationPulse = 1.0;
+  }
+
+  initTapToWalk() {
+    let touchStartTime = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const handlePointerDown = (e) => {
+      touchStartTime = performance.now();
+      touchStartX = e.clientX;
+      touchStartY = e.clientY;
+    };
+
+    const handlePointerUp = (e) => {
+      const dt = performance.now() - touchStartTime;
+      const dx = Math.abs(e.clientX - touchStartX);
+      const dy = Math.abs(e.clientY - touchStartY);
+
+      // Must be a clean quick tap, not a drag or long hold
+      if (dt > 380 || dx > 20 || dy > 20) return;
+
+      // Ignore if clicking UI elements, HUD, modal, or controls
+      const target = e.target;
+      if (target.closest('.nopex-hud-header, .arcade-mobile-joystick, .arcade-mobile-dpad, .arcade-mobile-action-btn, .arcade-hologram-card, .arcade-game-overlay, .mobile-teleport-drawer')) {
+        return;
+      }
+
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      this.raycaster.setFromCamera({ x: mouseX, y: mouseY }, this.camera);
+
+      // 1. Check if an arcade cabinet was tapped
+      let tappedCabinet = null;
+      let closestDist = Infinity;
+
+      for (const cab of this.world.cabinets) {
+        const intersects = this.raycaster.intersectObjects(cab.group.children, true);
+        if (intersects.length > 0 && intersects[0].distance < closestDist) {
+          closestDist = intersects[0].distance;
+          tappedCabinet = cab;
+        }
+      }
+
+      if (tappedCabinet) {
+        this.showDestinationPulse(tappedCabinet.standSpot.x, tappedCabinet.standSpot.z);
+        this.player.setNavigationTarget(tappedCabinet.standSpot.x, tappedCabinet.standSpot.z, () => {
+          this.interaction.update(this.player);
+        });
+        return;
+      }
+
+      // 2. Check if the floor was tapped
+      if (this.world.floorMesh) {
+        const floorIntersects = this.raycaster.intersectObject(this.world.floorMesh);
+        if (floorIntersects.length > 0) {
+          const pt = floorIntersects[0].point;
+          // Clamp target to room bounds
+          const b = this.world.roomBounds;
+          const targetX = Math.max(b.minX + 0.5, Math.min(b.maxX - 0.5, pt.x));
+          const targetZ = Math.max(b.minZ + 0.5, Math.min(b.maxZ - 0.5, pt.z));
+
+          this.showDestinationPulse(targetX, targetZ);
+          this.player.setNavigationTarget(targetX, targetZ, () => {
+            this.interaction.update(this.player);
+          });
+        }
+      }
+    };
+
+    const dom = this.renderer.domElement;
+    dom.addEventListener('pointerdown', handlePointerDown);
+    dom.addEventListener('pointerup', handlePointerUp);
   }
 
   initMobileControls() {
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
+    if (isTouchDevice) {
+      document.body.classList.add('touch-device');
+    }
+
     const joystickArea = document.getElementById('arcade-joystick');
     const stickThumb = document.getElementById('joystick-thumb');
     if (!joystickArea || !stickThumb) return;
@@ -98,14 +205,53 @@ export class Arcade3DEngine {
     let startY = 0;
     const maxRadius = 45;
 
+    // Arrow indicator elements
+    const arrowUp = joystickArea.querySelector('.arrow-up');
+    const arrowDown = joystickArea.querySelector('.arrow-down');
+    const arrowLeft = joystickArea.querySelector('.arrow-left');
+    const arrowRight = joystickArea.querySelector('.arrow-right');
+
+    const updateArrows = (dx, dy) => {
+      if (arrowUp) arrowUp.classList.toggle('active', dy < -12);
+      if (arrowDown) arrowDown.classList.toggle('active', dy > 12);
+      if (arrowLeft) arrowLeft.classList.toggle('active', dx < -12);
+      if (arrowRight) arrowRight.classList.toggle('active', dx > 12);
+    };
+
     const handleTouchStart = (e) => {
+      // Don't capture if overlay is open
+      if (this.overlay && this.overlay.isOpen) return;
+
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         const rect = joystickArea.getBoundingClientRect();
-        if (t.clientX >= rect.left && t.clientX <= rect.right && t.clientY >= rect.top && t.clientY <= rect.bottom) {
+        
+        // Touch on the joystick widget itself OR anywhere in the bottom-left quadrant
+        const inJoystick = (t.clientX >= rect.left && t.clientX <= rect.right && t.clientY >= rect.top && t.clientY <= rect.bottom);
+        const inLeftQuadrant = (t.clientX <= window.innerWidth * 0.55 && t.clientY >= window.innerHeight * 0.40);
+
+        if (touchId === null && (inJoystick || inLeftQuadrant)) {
+          // Check target to ensure we don't block HUD or header
+          if (t.target && t.target.closest && t.target.closest('.nopex-hud-header, .mobile-teleport-drawer, .arcade-mobile-action-btn, #arcade-game-overlay')) {
+            continue;
+          }
+
+          e.preventDefault();
           touchId = t.identifier;
-          startX = rect.left + rect.width / 2;
-          startY = rect.top + rect.height / 2;
+
+          if (inJoystick) {
+            startX = rect.left + rect.width / 2;
+            startY = rect.top + rect.height / 2;
+          } else {
+            // Dynamic repositioning: center joystick under player's thumb
+            startX = t.clientX;
+            startY = t.clientY;
+            joystickArea.style.left = `${Math.max(12, Math.min(window.innerWidth - 130, startX - rect.width / 2))}px`;
+            joystickArea.style.bottom = `${Math.max(12, Math.min(window.innerHeight - 130, window.innerHeight - startY - rect.height / 2))}px`;
+          }
+
+          joystickArea.classList.add('active');
+          this.player.clearNavigationTarget();
           break;
         }
       }
@@ -116,6 +262,7 @@ export class Arcade3DEngine {
       for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         if (t.identifier === touchId) {
+          e.preventDefault();
           let dx = t.clientX - startX;
           let dy = t.clientY - startY;
           const dist = Math.hypot(dx, dy);
@@ -126,6 +273,7 @@ export class Arcade3DEngine {
           }
 
           stickThumb.style.transform = `translate(${dx}px, ${dy}px)`;
+          updateArrows(dx, dy);
           this.player.setJoystickVector(dx / maxRadius, dy / maxRadius);
           break;
         }
@@ -137,6 +285,8 @@ export class Arcade3DEngine {
         if (e.changedTouches[i].identifier === touchId) {
           touchId = null;
           stickThumb.style.transform = `translate(0px, 0px)`;
+          joystickArea.classList.remove('active');
+          updateArrows(0, 0);
           this.player.setJoystickVector(0, 0);
           break;
         }
@@ -147,6 +297,37 @@ export class Arcade3DEngine {
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
     window.addEventListener('touchcancel', handleTouchEnd);
+
+    // On-Screen D-Pad Buttons
+    const dpadButtons = [
+      { id: 'dpad-up', vx: 0, vy: -1 },
+      { id: 'dpad-down', vx: 0, vy: 1 },
+      { id: 'dpad-left', vx: -1, vy: 0 },
+      { id: 'dpad-right', vx: 1, vy: 0 }
+    ];
+
+    dpadButtons.forEach(({ id, vx, vy }) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+
+      const press = (e) => {
+        e.preventDefault();
+        this.player.clearNavigationTarget();
+        this.player.setJoystickVector(vx, vy);
+        btn.classList.add('pressed');
+      };
+
+      const release = (e) => {
+        e.preventDefault();
+        this.player.setJoystickVector(0, 0);
+        btn.classList.remove('pressed');
+      };
+
+      btn.addEventListener('pointerdown', press);
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointerleave', release);
+      btn.addEventListener('pointercancel', release);
+    });
   }
 
   onResize() {
@@ -179,6 +360,17 @@ export class Arcade3DEngine {
 
     // 1. Update World & Cabinets
     this.world.update(time);
+
+    // Animate tap destination ring
+    if (this.destinationPulse > 0) {
+      this.destinationPulse -= delta * 1.6;
+      const s = 0.6 + (1.0 - Math.max(0, this.destinationPulse)) * 0.9;
+      this.destinationRing.scale.set(s, s, s);
+      this.destinationRing.material.opacity = Math.max(0, this.destinationPulse) * 0.9;
+      if (this.destinationPulse <= 0) {
+        this.destinationRing.material.opacity = 0;
+      }
+    }
 
     // 2. Update Player if not currently in game overlay
     if (!this.overlay.isOpen) {

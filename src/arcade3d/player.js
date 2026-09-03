@@ -20,9 +20,18 @@ export class ArcadePlayer {
     // Movement inputs
     this.keys = { forward: false, backward: false, left: false, right: false };
     this.joystickVector = { x: 0, y: 0 };
+    this.navTarget = null; // { x, z, onArrival }
 
     this.createAvatarMesh();
     this.bindKeyboard();
+  }
+
+  setNavigationTarget(x, z, onArrival = null) {
+    this.navTarget = { x, z, onArrival };
+  }
+
+  clearNavigationTarget() {
+    this.navTarget = null;
   }
 
   createAvatarMesh() {
@@ -224,6 +233,25 @@ export class ArcadePlayer {
     if (Math.abs(this.joystickVector.x) > 0.1 || Math.abs(this.joystickVector.y) > 0.1) {
       moveX += this.joystickVector.x;
       moveZ += this.joystickVector.y;
+    }
+
+    const manualLength = Math.hypot(moveX, moveZ);
+    if (manualLength > 0.01) {
+      // Manual control cancels any auto-navigation
+      this.navTarget = null;
+    } else if (this.navTarget) {
+      const dx = this.navTarget.x - this.x;
+      const dz = this.navTarget.z - this.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist < 0.35) {
+        // Arrived at target
+        const onArrival = this.navTarget.onArrival;
+        this.navTarget = null;
+        if (onArrival) onArrival();
+      } else {
+        moveX = dx / dist;
+        moveZ = dz / dist;
+      }
     }
 
     const length = Math.hypot(moveX, moveZ);

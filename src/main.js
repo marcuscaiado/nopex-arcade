@@ -39,6 +39,29 @@ function initNopexArcade() {
     });
   }
 
+  // Mobile Control Mode Switcher (Joystick <-> D-Pad)
+  const ctrlToggle = document.getElementById('arcade-ctrl-toggle');
+  const joystickEl = document.getElementById('arcade-joystick');
+  const dpadEl = document.getElementById('arcade-dpad');
+  let currentMode = 'joystick';
+
+  if (ctrlToggle && joystickEl && dpadEl) {
+    ctrlToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentMode === 'joystick') {
+        currentMode = 'dpad';
+        joystickEl.style.display = 'none';
+        dpadEl.style.display = 'flex';
+        ctrlToggle.innerHTML = '<span>🕹️ JOYSTICK</span>';
+      } else {
+        currentMode = 'joystick';
+        joystickEl.style.display = 'block';
+        dpadEl.style.display = 'none';
+        ctrlToggle.innerHTML = '<span>🎮 D-PAD</span>';
+      }
+    });
+  }
+
   // Fetch Live Global Leaderboards for Hologram HUD Cards
   async function syncWorldRecords() {
     window.__ARCADE_LEADERBOARDS__ = window.__ARCADE_LEADERBOARDS__ || {};
