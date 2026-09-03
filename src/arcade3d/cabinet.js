@@ -180,6 +180,9 @@ export function createArcadeCabinet(game, position, rotationY = 0) {
   if (game.id === 'street-fighter-2') {
     theme = { primary: 0xff3b30, secondary: 0x0066ff, accent: 0xffd32a };
   }
+  if (game.id === 'super-mario') {
+    theme = { primary: 0xe52521, secondary: 0x43b047, accent: 0xfbd000 };
+  }
 
   // Materials with good ambient visibility
   const cabinetBodyMat = new THREE.MeshStandardMaterial({

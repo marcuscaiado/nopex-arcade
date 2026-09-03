@@ -264,6 +264,7 @@ export function buildArcadeWorld(scene, gamesManifest) {
   addCabinet('neon-drift-racer',    { x: -15, z: -26 }, 0);
   addCabinet('cyber-runner-3d',     { x: -9, z: -26 }, 0);
   addCabinet('neon-stack-3d',       { x: -3, z: -26 }, 0);
+  addCabinet('super-mario',         { x: 0, z: -26 }, 0);
   addCabinet('neon-orbit-drift',    { x: 3, z: -26 }, 0);
   addCabinet('cyber-pinball-fx',    { x: 9, z: -26 }, 0);
   addCabinet('flappy-cyber-droid',  { x: 15, z: -26 }, 0);
