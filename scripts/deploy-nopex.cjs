@@ -16,7 +16,7 @@ function copyFolderSync(from, to) {
 }
 
 console.log('📦 Building Nopex Arcade bundle...');
-execSync('node "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" run build', { stdio: 'inherit' });
+execSync('node ./node_modules/vite/bin/vite.js build', { stdio: 'inherit' });
 
 console.log('📌 Committing updates to master branch...');
 execSync('git add -A', { stdio: 'inherit' });
