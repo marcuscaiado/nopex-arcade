@@ -236,11 +236,14 @@ export function buildArcadeWorld(scene, gamesManifest) {
     cabinets.push(cab);
   };
 
-  // ZONE 1: CENTER ROTUNDA (4 Featured MegaHits with Wide Open Walkways)
-  addCabinet('cyber-pong-3d',     { x: 0, z: 2.8 }, Math.PI);          // Faces South towards player spawn
-  addCabinet('geometricsurvivor', { x: 0, z: -7.5 }, 0);          // Faces North
-  addCabinet('neon-viper',        { x: -6.0, z: -2.5 }, Math.PI / 2);  // Faces East
-  addCabinet('cute-mini-golf',    { x: 6.0, z: -2.5 }, -Math.PI / 2); // Faces West
+  // ENTRANCE GRAND SHOWCASE: NEON CYBER TETRIS 3D (Right in front of player spawn)
+  addCabinet('neon-tetris-3d',    { x: 0, z: 2.8 }, Math.PI);          // Faces South directly towards player spawn!
+
+  // ZONE 1: CENTER ROTUNDA (4 Featured MegaHits)
+  addCabinet('geometricsurvivor', { x: 0, z: -8.0 }, 0);               // Faces North
+  addCabinet('cyber-pong-3d',     { x: 0, z: -2.5 }, Math.PI);         // Faces South
+  addCabinet('neon-viper',        { x: -6.0, z: -5.2 }, Math.PI / 2);  // Faces East
+  addCabinet('cute-mini-golf',    { x: 6.0, z: -5.2 }, -Math.PI / 2);  // Faces West
 
   // ZONE 2: ACTION ALLEY (West Side, X = -18, Facing East)
   addCabinet('neon-katana-slash',   { x: -18, z: -17 }, Math.PI / 2);

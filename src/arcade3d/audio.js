@@ -54,41 +54,72 @@ export function playCoinDrop() {
     // High metal chime 1
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
-    osc1.type = 'sine';
+    osc1.type = 'triangle';
     osc1.frequency.setValueAtTime(1850, ctx.currentTime);
     osc1.frequency.exponentialRampToValueAtTime(2450, ctx.currentTime + 0.12);
-    gain1.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.18, ctx.currentTime);
     gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
     osc1.connect(gain1);
     gain1.connect(ctx.destination);
     osc1.start(ctx.currentTime);
     osc1.stop(ctx.currentTime + 0.28);
 
-    // Mechanical chute slide & latch
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(520, ctx.currentTime + 0.08);
-    osc2.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.32);
-    gain2.gain.setValueAtTime(0.2, ctx.currentTime + 0.08);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(ctx.currentTime + 0.08);
-    osc2.stop(ctx.currentTime + 0.32);
+    // Celestial Dopamine Arpeggio (C5, E5, G5, C6) - Pure Serotonin Delivery
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-    // Deep power-up hum
-    const osc3 = ctx.createOscillator();
-    const gain3 = ctx.createGain();
-    osc3.type = 'sine';
-    osc3.frequency.setValueAtTime(220, ctx.currentTime + 0.16);
-    osc3.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.55);
-    gain3.gain.setValueAtTime(0.18, ctx.currentTime + 0.16);
-    gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
-    osc3.connect(gain3);
-    gain3.connect(ctx.destination);
-    osc3.start(ctx.currentTime + 0.16);
-    osc3.stop(ctx.currentTime + 0.55);
+      const startTime = ctx.currentTime + idx * 0.05;
+      g.gain.setValueAtTime(0, startTime);
+      g.gain.linearRampToValueAtTime(0.16, startTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.5);
+
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.55);
+    });
+
+    // Deep warm velvet sub-bass boom
+    const sub = ctx.createOscillator();
+    const subG = ctx.createGain();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(110, ctx.currentTime + 0.12);
+    sub.frequency.exponentialRampToValueAtTime(42, ctx.currentTime + 0.45);
+    subG.gain.setValueAtTime(0.26, ctx.currentTime + 0.12);
+    subG.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.45);
+    sub.connect(subG);
+    subG.connect(ctx.destination);
+    sub.start(ctx.currentTime + 0.12);
+    sub.stop(ctx.currentTime + 0.45);
+  } catch (e) {}
+}
+
+/**
+ * Pure comforting dopamine chime for UI and teleports
+ */
+export function playDopamineChime() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      const startTime = ctx.currentTime + idx * 0.055;
+      g.gain.setValueAtTime(0, startTime);
+      g.gain.linearRampToValueAtTime(0.18, startTime + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.5);
+    });
   } catch (e) {}
 }
 
