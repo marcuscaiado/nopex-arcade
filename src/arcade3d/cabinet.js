@@ -176,7 +176,10 @@ export function createArcadeCabinet(game, position, rotationY = 0) {
   for (let i = 0; i < (game.id || '').length; i++) {
     hash = ((hash << 5) - hash) + game.id.charCodeAt(i);
   }
-  const theme = CABINET_THEMES[Math.abs(hash) % CABINET_THEMES.length];
+  let theme = CABINET_THEMES[Math.abs(hash) % CABINET_THEMES.length];
+  if (game.id === 'street-fighter-2') {
+    theme = { primary: 0xff3b30, secondary: 0x0066ff, accent: 0xffd32a };
+  }
 
   // Materials with good ambient visibility
   const cabinetBodyMat = new THREE.MeshStandardMaterial({
