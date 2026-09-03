@@ -252,6 +252,7 @@ export function buildArcadeWorld(scene, gamesManifest) {
   addCabinet('asteroid-blitz',      { x: -18, z: 1 }, Math.PI / 2);
   addCabinet('cyber-shuriken',      { x: -18, z: 7 }, Math.PI / 2);
   addCabinet('street-fighter-2',    { x: -18, z: 13 }, Math.PI / 2);
+  addCabinet('gta-2',               { x: -18, z: 19 }, Math.PI / 2);
 
   // ZONE 3: SPORTS & CASUAL (East Side, X = +18, Facing West)
   addCabinet('kawaii-8ball-pool',   { x: 18, z: -17 }, -Math.PI / 2);

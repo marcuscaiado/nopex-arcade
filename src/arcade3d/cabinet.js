@@ -186,6 +186,9 @@ export function createArcadeCabinet(game, position, rotationY = 0) {
   if (game.id === 'super-bomberman') {
     theme = { primary: 0x0070ec, secondary: 0xffffff, accent: 0xff4757 };
   }
+  if (game.id === 'gta-2') {
+    theme = { primary: 0xffd32a, secondary: 0x0066ff, accent: 0xff3838 };
+  }
 
   // Materials with good ambient visibility
   const cabinetBodyMat = new THREE.MeshStandardMaterial({
