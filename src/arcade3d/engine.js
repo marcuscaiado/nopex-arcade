@@ -88,6 +88,7 @@ export class Arcade3DEngine {
       this.isZoomingIn = false;
       this.zoomTarget = null;
       this.zoomProgress = 0;
+      this.clock.getDelta(); // Reset clock delta so camera doesn't jump
     });
   }
 
@@ -376,6 +377,12 @@ export class Arcade3DEngine {
   animate() {
     if (!this.isRunning) return;
     requestAnimationFrame(() => this.animate());
+
+    // When game overlay is open, completely suspend 3D rendering
+    // This gives 100% of GPU and CPU budget to the retro emulator
+    if (this.overlay && this.overlay.isOpen) {
+      return;
+    }
 
     const delta = Math.min(this.clock.getDelta(), 0.1);
     const time = this.clock.getElapsedTime();
