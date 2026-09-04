@@ -237,10 +237,11 @@ export function buildArcadeWorld(scene, gamesManifest) {
     cabinets.push(cab);
   };
 
-  // ENTRANCE GRAND SHOWCASE: NEON CYBER TETRIS 3D & PHASE AI JUKEBOX
-  addCabinet('neon-tetris-3d',    { x: 0, z: 2.8 }, 0);                // Faces South directly towards player spawn!
+  // ENTRANCE GRAND SHOWCASE: PAC-MAN, NEON CYBER TETRIS 3D & RETRO JUKEBOX
+  addCabinet('classic-pacman',    { x: -3.6, z: 2.8 }, 0);               // Faces South: Iconic 1980 Pac-Man!
+  addCabinet('neon-tetris-3d',    { x: 0, z: 2.8 }, 0);                  // Faces South directly towards player spawn!
 
-  // PHASE AI JUKEBOX (Grand Entrance Music Pavilion)
+  // RETRO ARCADE JUKEBOX (Grand Entrance Music Pavilion)
   const jukebox = createJukeboxCabinet({ x: 3.6, z: 2.8 }, 0);
   worldGroup.add(jukebox.group);
   cabinets.push(jukebox);
