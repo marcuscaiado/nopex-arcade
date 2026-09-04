@@ -20,9 +20,11 @@ export class Arcade3DEngine {
     this.initScene();
     this.initWorld();
     this.initPlayer();
+    this.initTokens();
     this.initInteraction();
     this.initOverlay();
     this.initJukebox();
+    this.initPointerLock();
     this.initMobileControls();
     this.initTapToWalk();
 
@@ -77,10 +79,51 @@ export class Arcade3DEngine {
     this.player = new ArcadePlayer(this.scene);
   }
 
+  initTokens() {
+    let stored = parseInt(localStorage.getItem('arcade_tokens'), 10);
+    if (isNaN(stored) || stored <= 0) stored = 25;
+    this.tokens = stored;
+    try {
+      this.discoveredCabinets = new Set(JSON.parse(localStorage.getItem('arcade_discovered') || '[]'));
+    } catch (e) {
+      this.discoveredCabinets = new Set();
+    }
+    this.updateTokensDisplay();
+  }
+
+  updateTokensDisplay() {
+    const el = document.getElementById('arcade-tokens-val');
+    if (el) el.textContent = this.tokens;
+    localStorage.setItem('arcade_tokens', String(this.tokens));
+  }
+
+  spendToken() {
+    if (this.tokens > 0) {
+      this.tokens -= 1;
+    } else {
+      this.tokens = 5; // Automatic bonus reload
+    }
+    this.updateTokensDisplay();
+    import('./audio.js').then(m => m.playCoinDrop?.());
+  }
+
+  awardExplorationToken(cabId) {
+    if (cabId && !this.discoveredCabinets.has(cabId)) {
+      this.discoveredCabinets.add(cabId);
+      try {
+        localStorage.setItem('arcade_discovered', JSON.stringify([...this.discoveredCabinets]));
+      } catch (e) {}
+      this.tokens += 2;
+      this.updateTokensDisplay();
+    }
+  }
+
   initInteraction() {
-    this.interaction = new ArcadeInteraction(this.world.cabinets, (game, cabinet) => {
-      this.launchGame(game, cabinet);
-    });
+    this.interaction = new ArcadeInteraction(
+      this.world.cabinets,
+      (game, cabinet) => this.launchGame(game, cabinet),
+      (game) => this.awardExplorationToken(game?.id)
+    );
   }
 
   initOverlay() {
@@ -98,7 +141,50 @@ export class Arcade3DEngine {
     musicManager.init();
   }
 
+  initPointerLock() {
+    const dom = this.renderer.domElement;
+    this.isPointerLocked = false;
+    this.camPitch = 0;
+
+    // Click canvas to lock pointer on desktop
+    dom.addEventListener('click', (e) => {
+      if (document.body.classList.contains('touch-device') || ('ontouchstart' in window)) return;
+      if (window.__arcadeOverlayOpen || (this.overlay && this.overlay.isOpen)) return;
+      if (this.jukeboxModal && this.jukeboxModal.isOpen) return;
+
+      if (e.target.closest && e.target.closest('.nopex-hud-header, .arcade-music-hud, .arcade-commands-dock, .arcade-hologram-card, .arcade-jukebox-modal')) {
+        return;
+      }
+
+      if (document.pointerLockElement !== dom && dom.requestPointerLock) {
+        dom.requestPointerLock();
+      }
+    });
+
+    document.addEventListener('pointerlockchange', () => {
+      this.isPointerLocked = (document.pointerLockElement === dom);
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!this.isPointerLocked) return;
+      if (window.__arcadeOverlayOpen || (this.overlay && this.overlay.isOpen)) return;
+
+      const movementX = e.movementX || 0;
+      const movementY = e.movementY || 0;
+
+      // Rotate player yaw with mouse X
+      this.player.rotation -= movementX * 0.0032;
+      this.player.targetRotation = this.player.rotation;
+
+      // Adjust camera pitch subtly with mouse Y (-0.2 to +0.35 rad)
+      this.camPitch = Math.max(-0.2, Math.min(0.35, (this.camPitch || 0) - movementY * 0.0018));
+    });
+  }
+
   openJukebox() {
+    if (document.pointerLockElement) {
+      document.exitPointerLock?.();
+    }
     if (this.jukeboxModal) {
       import('./audio.js').then(m => m.playDopamineChime());
       this.jukeboxModal.open();
@@ -110,6 +196,12 @@ export class Arcade3DEngine {
       this.openJukebox();
       return;
     }
+
+    if (document.pointerLockElement) {
+      document.exitPointerLock?.();
+    }
+
+    this.spendToken();
 
     this.isZoomingIn = true;
     this.zoomTarget = cabinet;
@@ -387,8 +479,8 @@ export class Arcade3DEngine {
     const delta = Math.min(this.clock.getDelta(), 0.1);
     const time = this.clock.getElapsedTime();
 
-    // 1. Update World & Cabinets
-    this.world.update(time);
+    // 1. Update World & Cabinets with distance-based LOD
+    this.world.update(time, this.player);
 
     // Animate tap destination ring
     if (this.destinationPulse > 0) {
@@ -433,9 +525,10 @@ export class Arcade3DEngine {
       this.camera.position.lerp(targetCamPos, 0.16);
       this.camera.lookAt(screenCenter);
     } else {
-      // Third-person smooth follow (Fixed height steadycam: 100% fluid, zero tilt)
+      // Third-person smooth follow with pitch support
+      const pitch = this.camPitch || 0;
       const targetCamX = this.player.x;
-      const targetCamY = 4.0;
+      const targetCamY = 4.0 + pitch * 2.2;
       // Clamp camera so it NEVER penetrates the south wall
       const targetCamZ = Math.min(26.0, this.player.z + 6.2);
 
@@ -443,12 +536,12 @@ export class Arcade3DEngine {
       this.camera.position.y += (targetCamY - this.camera.position.y) * 0.14;
       this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.14;
 
-      // Smooth lookTarget with synchronized lerp to prevent any camera tilt or sway
+      // Smooth lookTarget with synchronized lerp
       if (!this.camLookTarget) {
         this.camLookTarget = new THREE.Vector3(this.player.x, 1.4, this.player.z - 1.2);
       }
       this.camLookTarget.x += (this.player.x - this.camLookTarget.x) * 0.14;
-      this.camLookTarget.y = 1.4;
+      this.camLookTarget.y = 1.4 + pitch * 3.5;
       this.camLookTarget.z += ((this.player.z - 1.2) - this.camLookTarget.z) * 0.14;
 
       this.camera.lookAt(this.camLookTarget);

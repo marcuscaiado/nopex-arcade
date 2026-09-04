@@ -32,7 +32,10 @@ function initNopexArcade() {
     console.error('Fatal WebGL / Three.js Initialization Error:', err);
     if (errorBanner) {
       errorBanner.style.display = 'block';
-      errorBanner.textContent = 'Erro ao inicializar 3D: ' + err.message;
+      const textEl = errorBanner.querySelector('.webgl-error-text');
+      if (textEl) {
+        textEl.textContent = '⚠️ Erro ao inicializar 3D: ' + err.message;
+      }
     }
     return;
   }

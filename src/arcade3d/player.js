@@ -176,10 +176,28 @@ export class ArcadePlayer {
     }
   }
 
+  resetMovement() {
+    this.keys.forward = false;
+    this.keys.backward = false;
+    this.keys.left = false;
+    this.keys.right = false;
+    this.joystickVector.x = 0;
+    this.joystickVector.y = 0;
+    this.isMoving = false;
+  }
+
   bindKeyboard() {
     window.addEventListener('keydown', (e) => {
-      // Ignore inputs if typing in an input field
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+      // Ignore inputs if typing in an input field or if game overlay / modal is open
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      if (window.__arcadeOverlayOpen || document.getElementById('arcade-game-overlay')?.style.display !== 'none') {
+        this.resetMovement();
+        return;
+      }
+      if (document.getElementById('arcade-jukebox-modal')?.style.display !== 'none') {
+        this.resetMovement();
+        return;
+      }
 
       switch (e.code) {
         case 'KeyW':
@@ -198,6 +216,10 @@ export class ArcadePlayer {
     });
 
     window.addEventListener('keyup', (e) => {
+      if (window.__arcadeOverlayOpen || document.getElementById('arcade-game-overlay')?.style.display !== 'none') {
+        this.resetMovement();
+        return;
+      }
       switch (e.code) {
         case 'KeyW':
         case 'ArrowUp':

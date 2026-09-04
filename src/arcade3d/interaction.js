@@ -1,9 +1,10 @@
 import { playCabinetHighlight } from './audio.js';
 
 export class ArcadeInteraction {
-  constructor(cabinets, onPlayGame) {
+  constructor(cabinets, onPlayGame, onDiscoverCabinet = null) {
     this.cabinets = cabinets;
     this.onPlayGame = onPlayGame;
+    this.onDiscoverCabinet = onDiscoverCabinet;
     this.activeCabinet = null;
     this.lastHoveredCab = null;
 
@@ -74,6 +75,9 @@ export class ArcadeInteraction {
         playCabinetHighlight();
         this.lastHoveredCab = closestCab;
         this.renderHologram(closestCab.game);
+        if (this.onDiscoverCabinet) {
+          this.onDiscoverCabinet(closestCab.game, closestCab);
+        }
       }
 
       if (this.promptEl) this.promptEl.classList.add('visible');
