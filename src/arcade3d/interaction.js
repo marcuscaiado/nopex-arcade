@@ -20,7 +20,7 @@ export class ArcadeInteraction {
 
   bindInputs() {
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && this.activeCabinet) {
+      if ((e.code === 'Enter' || e.code === 'KeyE' || e.code === 'Space') && this.activeCabinet) {
         e.preventDefault();
         this.triggerPlay();
       }
@@ -107,9 +107,9 @@ export class ArcadeInteraction {
     }
     if (this.playBtn) {
       if (game.isJukebox) {
-        this.playBtn.innerHTML = `<span>PRESSIONE [ESPAÇO] PARA OUVIR</span> ➔`;
+        this.playBtn.innerHTML = `<span>PRESSIONE <kbd class="kbd-action">E</kbd> OU <kbd class="kbd-action">J</kbd> PARA OUVIR</span> ➔`;
       } else {
-        this.playBtn.innerHTML = `<span>PRESSIONE [ESPAÇO] PARA JOGAR</span> ➔`;
+        this.playBtn.innerHTML = `<span>PRESSIONE <kbd class="kbd-action">E</kbd> OU <kbd class="kbd-action">ENTER</kbd> PARA JOGAR</span> ➔`;
       }
     }
     if (this.actionBtn) {

@@ -50,6 +50,22 @@ function initNopexArcade() {
     });
   }
 
+  // Global Keyboard Shortcut (J: Jukebox)
+  window.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+      return;
+    }
+
+    if (e.code === 'KeyJ' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      const overlay = document.getElementById('arcade-game-overlay');
+      if (!overlay || overlay.style.display === 'none') {
+        if (engine && engine.jukeboxModal) {
+          engine.jukeboxModal.open();
+        }
+      }
+    }
+  });
+
   // Mobile Control Mode Switcher (Joystick <-> D-Pad)
   const ctrlToggle = document.getElementById('arcade-ctrl-toggle');
   const joystickEl = document.getElementById('arcade-joystick');
