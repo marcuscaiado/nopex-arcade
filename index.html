@@ -23,8 +23,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="arcade-leaderboard.js"></script>
     <script src="arcade-difficulty.js"></script>
-    <script type="module" crossorigin src="./assets/index-CyN1ITBr.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BrnFVsUu.css">
+    <script type="module" crossorigin src="./assets/index-Bu-LQXsv.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DDmV8O6Y.css">
   </head>
   <body>
     <!-- Fullscreen 3D Viewport -->
@@ -39,6 +39,9 @@
         </div>
 
         <div class="hud-right">
+          <div class="hud-tokens-badge" id="hud-tokens-badge" title="Suas Fichas de Fliperama (Ganhe +2 explorando novas máquinas)">
+            🪙 <span id="arcade-tokens-val">25</span> <small>FICHAS</small>
+          </div>
           <div class="teleport-dropdown-wrap">
             <select id="teleport-select" class="teleport-select" title="Teletransportar para máquina">
               <option value="">🚀 Teleporte Rápido...</option>
@@ -224,7 +227,12 @@
 
       <!-- WebGL Diagnostics Banner (hidden unless error) -->
       <div id="webgl-error" class="webgl-error-banner" style="display: none;">
-        ⚠️ Não foi possível iniciar a aceleração WebGL. Verifique se a aceleração por hardware está habilitada nas configurações do seu navegador.
+        <div class="webgl-error-title">⚡ NOPEX ARCADE 3D ⚡</div>
+        <p class="webgl-error-text">⚠️ Aceleração 3D WebGL indisponível ou desativada neste navegador.</p>
+        <p class="webgl-error-sub">Você pode curtir todos os 38 jogos sem perda de desempenho diretamente no catálogo Grid 2D:</p>
+        <a href="https://marcuscaiado.github.io/marcus-arcade/" class="webgl-fallback-btn">
+          📋 ABRIR CATÁLOGO GRID 2D (JOGAR DIRETO) ➔
+        </a>
       </div>
     </div>
 
