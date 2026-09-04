@@ -3,6 +3,9 @@ import { ArcadePlayer } from './player.js';
 import { buildArcadeWorld } from './world.js';
 import { ArcadeInteraction } from './interaction.js';
 import { ArcadePlayOverlay } from './play-overlay.js';
+import { musicManager } from './music-manager.js';
+import { ArcadeJukeboxModal } from './jukebox-modal.js';
+import { ArcadeMusicHud } from './music-hud.js';
 
 export class Arcade3DEngine {
   constructor(containerEl, gamesManifest) {
@@ -19,6 +22,7 @@ export class Arcade3DEngine {
     this.initPlayer();
     this.initInteraction();
     this.initOverlay();
+    this.initJukebox();
     this.initMobileControls();
     this.initTapToWalk();
 
@@ -87,7 +91,25 @@ export class Arcade3DEngine {
     });
   }
 
+  initJukebox() {
+    this.jukeboxModal = new ArcadeJukeboxModal();
+    this.musicHud = new ArcadeMusicHud(() => this.openJukebox());
+    musicManager.init();
+  }
+
+  openJukebox() {
+    if (this.jukeboxModal) {
+      import('./audio.js').then(m => m.playDopamineChime());
+      this.jukeboxModal.open();
+    }
+  }
+
   launchGame(game, cabinet) {
+    if (cabinet && cabinet.isJukebox) {
+      this.openJukebox();
+      return;
+    }
+
     this.isZoomingIn = true;
     this.zoomTarget = cabinet;
     this.zoomProgress = 0;
