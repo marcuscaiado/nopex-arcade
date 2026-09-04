@@ -23,8 +23,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="arcade-leaderboard.js"></script>
     <script src="arcade-difficulty.js"></script>
-    <script type="module" crossorigin src="./assets/index-B_3_acd3.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-tN9AHlif.css">
+    <script type="module" crossorigin src="./assets/index-CLl_bWC-.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Ps30dX32.css">
   </head>
   <body>
     <!-- Fullscreen 3D Viewport -->
@@ -52,6 +52,9 @@
           <div class="teleport-dropdown-wrap">
             <select id="teleport-select" class="teleport-select" title="Teletransportar para máquina">
               <option value="">🚀 Teleporte Rápido...</option>
+              <optgroup label="📻 Música & Jukebox">
+                <option value="phase-ai-jukebox">📻 Phase AI Jukebox ⚡</option>
+              </optgroup>
               <optgroup label="🌟 Megahits em Destaque">
                 <option value="neon-tetris-3d">🧱 Neon Cyber Tetris 3D</option>
                 <option value="geometricsurvivor">⚔️ Geometric Survivor 3D</option>
@@ -92,6 +95,26 @@
           </a>
         </div>
       </header>
+
+      <!-- Top Cyberpunk Music HUD Player (Phase AI FM) -->
+      <aside id="arcade-music-hud" class="arcade-music-hud" aria-label="Player de Música IA">
+        <div class="music-hud-eq" id="music-hud-eq" title="Equalizador de Áudio">
+          <span class="hud-eq-bar"></span>
+          <span class="hud-eq-bar"></span>
+          <span class="hud-eq-bar"></span>
+          <span class="hud-eq-bar"></span>
+        </div>
+        <div class="music-hud-info" id="music-hud-ticker" title="Clique para abrir o Jukebox">
+          🎵 <strong>KAI-Ø</strong> — NIGHT DRIFT 2088
+        </div>
+        <div class="music-hud-controls">
+          <button id="music-hud-prev" class="hud-ctrl-btn" title="Faixa Anterior">⏮</button>
+          <button id="music-hud-play" class="hud-ctrl-btn hud-play-btn" title="Tocar / Pausar">▶</button>
+          <button id="music-hud-next" class="hud-ctrl-btn" title="Próxima Faixa">⏭</button>
+          <button id="music-hud-vol" class="hud-ctrl-btn" title="Mutar / Desmutar">🔊</button>
+          <button id="music-hud-expand" class="hud-expand-btn" title="Abrir Jukebox Completo">📻 JUKEBOX</button>
+        </div>
+      </aside>
 
       <!-- Floating Hologram Card HUD when near an arcade cabinet -->
       <div id="arcade-3d-prompt" class="arcade-hologram-card">
@@ -163,6 +186,9 @@
         <iframe id="arcade-game-iframe" src="about:blank" allow="autoplay; fullscreen; encrypted-media"></iframe>
       </div>
     </div>
+
+    <!-- Phase AI Jukebox Modal Overlay -->
+    <div id="arcade-jukebox-modal" class="arcade-jukebox-modal" style="display: none;"></div>
 
   </body>
 </html>
